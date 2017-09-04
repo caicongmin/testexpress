@@ -3,8 +3,10 @@ var path = require('path');
 var favicon = require('serve-favicon');
 var logger = require('morgan');
 var cookieParser = require('cookie-parser');
+var session = require('express-session');
 var bodyParser = require('body-parser');
 var configs = require('./config');
+
 
 var log4js = require('./utils/log');
 var log = log4js.logger('logInfo');
@@ -38,6 +40,18 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
+app.use(session({
+    secret: '19941123',
+    name: 'app',
+    resave: false,
+    saveUninitialized: true,
+}));
+
+app.use(function(req, res, next) {
+    var session = req.session;
+    // console.log("session =>", session);
+    next();
+});
 
 app.use('/', index);
 app.use('/users', users);
@@ -46,9 +60,10 @@ app.use('/users', users);
 app.use(function(req, res, next) {
   var err = new Error('Not Found');
   err.status = 404;
+
+  console.log("req", req);
   next(err);
 });
-
 
 // error handler
 app.use(function(err, req, res, next) {
